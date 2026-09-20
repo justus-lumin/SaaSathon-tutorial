@@ -1,44 +1,42 @@
 # Meeting Recorder
 
-The world's most generic meeting recorder. A simple website that records a meeting, transcribes it, and summarizes it. Plain, reliable, and easy to use.
+The world's most generic meeting recorder. Start recording, stop recording, and get the audio, a full transcript, and a short summary. A plain, fast website that gets the job done.
 
 ## Status
 
-This repository is in the planning and documentation stage. The app has not been scaffolded, and no Supabase project or Vercel deployment has been created for it yet.
+Planning and documentation only. No app code, dependencies, Supabase project, or Vercel deployment has been created. Brand and design-system work comes before implementation. “Meeting Recorder” is a working name.
 
-## The basic flow
-
-1. Start recording a meeting.
-2. Stop recording when the meeting ends.
-3. Process the recording to produce a transcript and summary.
-4. Read the transcript and summary on the website.
-
-Transcription and summarization can happen after recording stops. Real-time processing is not required.
-
-## Planned stack
+## Agreed stack
 
 | Part | Technology |
 | --- | --- |
-| Website | Next.js |
-| Backend | Supabase, using a new project |
-| Hosting | Vercel |
-| Transcription and summarization | Provider to be confirmed |
+| Website and API | Next.js App Router, hosted on Vercel |
+| UI | shadcn/ui |
+| Client API state | TanStack Query |
+| Login | Google through Supabase Auth |
+| Backend | A new Supabase project |
+| Recording files | Private Supabase Storage |
+| Transcript and summary | Markdown strings in Supabase Postgres |
+| Inference | OpenRouter |
 
-## Principles
+TypeScript and Tailwind CSS are proposed implementation defaults. Model recommendations are **Whisper Large V3 Turbo** for transcription and **Nova Micro** for summaries, both through OpenRouter. See the dated [model comparison](docs/models.md) for prices, alternatives, and validation still needed.
 
-- Keep the interface plain and the workflow obvious.
-- Prefer the simplest solution that works reliably.
-- Focus on recording, transcription, and summarization.
-- Add features only when they serve the core workflow.
+## Product
+
+- A public landing page and a small set of useful SEO pages.
+- Google sign-in, followed by one simple recording page.
+- Start and stop controls, with a visible recording state.
+- Past meetings with audio playback, the full transcript, and a summary.
+- Processing after recording stops; no real-time transcription required.
+
+Keep the UI small. Reliability, readable content, and clear recovery matter more than extra features.
 
 ## Documentation
 
-Project documentation lives in [`docs/`](docs/README.md). Before implementation, document the recording approach, data flow, and acceptance criteria.
+Start with the [documentation index](docs/README.md). It links the requirements, architecture, data model, model research, public-page plan, setup guide, and implementation sequence.
 
-Decisions still to make include microphone versus meeting/tab audio capture, authentication, recording retention, and the transcription and summary provider.
+The [brand brief](brand.md) prepares the next phase. It does not establish a final name, logo, palette, or typography.
 
 ## Development
 
-There are no app dependencies or run commands yet. Setup instructions will be added when the Next.js app is scaffolded.
-
-Supabase and Vercel configuration will follow the documented implementation plan. Keep credentials out of Git; local environment files are ignored. Once configuration is defined, document the required variables in a committed `.env.example` containing placeholders only.
+There are no install or run commands yet. [Setup](docs/setup.md) describes the future configuration and required secrets. Never commit credentials or real meeting content. Local environment files are ignored.
