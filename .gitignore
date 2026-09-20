@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+.pnp.*
+
+# Next.js and build output
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local credentials and environment configuration
+.env
+.env.*
+!.env.example
+*.pem
+
+# Hosting and backend CLI state
+.vercel/
+supabase/.temp/
+supabase/.branches/
+
+# Test output and logs
+coverage/
+playwright-report/
+test-results/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
