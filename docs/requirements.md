@@ -4,7 +4,7 @@
 
 A website for someone who wants to record a meeting and return to what was said. The core experience is Google login, start, stop, and review. Next.js, Vercel, Supabase, OpenRouter, TanStack Query, and shadcn/ui are confirmed choices.
 
-Public surfaces: a landing page and useful SEO pages. Private surfaces: a recording/history page and a meeting detail page. Each meeting preserves its audio, full transcript, and summary. Transcript and summary are Markdown text. Processing happens after recording stops.
+Public surfaces: a landing page and useful SEO pages. Private surfaces: a recording/history page and a meeting detail page. Each meeting preserves its audio, full transcript, and summary. Transcript and summary are Markdown text. Processing happens after recording stops. Once transcription finishes, the summary streams into the page as formatted Markdown while it is generated.
 
 ## User flow
 
@@ -39,7 +39,8 @@ The history list shows date, title, duration, and a plain-language status. The d
 | Page closes during recording | Recording stops; recover locally persisted bytes where possible, without claiming seamless continuation |
 | Page closes after upload/queue confirmation | Processing continues without the browser |
 | Transcription fails | Keep the audio and allow retry without re-recording |
-| Summary fails | Keep the transcript visible; retry only summarization |
+| Summary generating | Render partial Markdown immediately, including tables, code, and LaTeX; clearly label it as generating |
+| Summary fails | Keep the transcript visible; mark partial summary incomplete and retry only summarization |
 | Reload or later login | Saved meetings and durable processing status remain available |
 | Empty/silent audio | Report no speech detected; do not invent meeting content |
 | Delete meeting | Confirm deletion, hide it, and reliably remove audio and text |

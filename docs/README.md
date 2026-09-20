@@ -7,6 +7,7 @@ Status: build specification, not an implemented product. Last updated: 21 Septem
 | [Requirements](requirements.md) | User flows, scope, acceptance criteria, and open product decisions |
 | [Architecture](architecture.md) | Recording, API contracts, background processing, and recovery |
 | [Data model](data-model.md) | Supabase records, private files, ownership, and deletion |
+| [Streaming UI](streaming-ui.md) | Streamdown, AI Elements, rich Markdown, and reconnect behavior |
 | [Models](models.md) | OpenRouter recommendations, current evidence, costs, and evaluation |
 | [Public pages](public-pages.md) | Landing page, SEO page briefs, indexing, and measurement |
 | [Setup](setup.md) | Future local setup, Google Auth, Supabase, OpenRouter, and Vercel |

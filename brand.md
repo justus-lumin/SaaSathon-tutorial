@@ -24,7 +24,8 @@ Prefer one strong direction with a small variation if needed. Avoid decorative d
 | Typography | UI/body face, optional display face, fallbacks, weights, sizes, line heights |
 | Color | Concrete semantic color values and verified text/control contrast |
 | Layout | Page widths, reading measure, spacing scale, responsive behavior |
-| Components | shadcn/ui variants for buttons, lists, tabs, alerts, dialogs, skeletons, and menus |
+| Components | shadcn/ui controls plus AI Elements responses/actions and Streamdown document styles |
+| Rich content | Headings, tables, lists, code, inline/display LaTeX, diagrams, and incomplete streaming states |
 | Interaction | Focus, disabled/loading states, recording indicator, restrained motion |
 | Voice | Final labels, empty states, errors, and landing-page copy direction |
 | Screen examples | Landing page, recorder/history, and meeting detail at desktop/mobile widths |
@@ -33,7 +34,7 @@ Design for light mode first as a proposal. Add dark mode only if deliberately in
 
 ## shadcn/ui mapping
 
-Use shadcn/ui as the component foundation. Define the approved palette centrally in CSS variables for `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, and `ring`, including their foreground pairs. Add recording/success tokens only where a distinct meaning is needed. Define radii and typography/spacing roles once.
+Use shadcn/ui as the component foundation and Vercel AI Elements for ChatGPT-style response components. This means familiar response rendering and actions, not ChatGPT branding or an added chat product. Streamdown handles rich Markdown. Define the approved palette centrally in CSS variables for `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, and `ring`, including their foreground pairs. Add recording/success tokens only where a distinct meaning is needed. Define radii and typography/spacing roles once.
 
 The final token values will live in the app's global theme when it exists; this file will explain their use and point to the canonical location. Do not maintain duplicate token values in multiple docs.
 

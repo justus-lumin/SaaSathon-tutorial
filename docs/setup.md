@@ -4,7 +4,7 @@ No steps in this document have been executed. There is no app to run yet. The re
 
 ## Local project, when implementation starts
 
-Scaffold Next.js App Router with TypeScript and Tailwind CSS. Use npm and commit its lockfile. Add shadcn/ui components as needed, TanStack Query, Supabase JS/SSR clients, TUS upload support, and a safe Markdown renderer. Use native fetch for OpenRouter unless a concrete need justifies another SDK.
+Scaffold Next.js App Router with TypeScript and Tailwind CSS. Use npm and commit its lockfile. Add shadcn/ui components as needed, TanStack Query, Supabase JS/SSR clients, TUS upload support, Streamdown with its math/code/diagram plugins, and the AI Elements message components. Add Vercel AI SDK (`ai`) and `@openrouter/ai-sdk-provider` for summary streaming. Use native fetch for transcription. Package commands and renderer configuration are specified in [Streaming UI](streaming-ui.md).
 
 Pin a Node LTS version supported by Next.js and Vercel at implementation time. Add dev, build, lint, typecheck, and test scripts then. Configure Linux FFmpeg/ffprobe packaging for the Vercel worker and test it in a real preview before committing to the processing approach.
 
@@ -12,7 +12,7 @@ Proposed structure: `src/app` for routes, `src/components/ui` for shadcn/ui, `sr
 
 ## Supabase and Google
 
-Create a new dedicated Supabase project. Choose its region alongside the Vercel worker region. Apply versioned migrations for tables, RLS, bucket rules, lease RPCs, and cleanup. Enable Cron/pg_net and configure the worker wake-up only after its endpoint exists.
+Create a new dedicated Supabase project. Choose its region alongside the Vercel worker region. Apply versioned migrations for tables, RLS, bucket rules, lease RPCs, and cleanup. Enable Cron/pg_net and configure the worker wake-up only after its endpoint exists. Enable the summary snapshot table in Supabase Realtime and verify owner-only subscription access.
 
 Justus will configure Google OAuth. The Google OAuth authorized redirect URI is the callback displayed by Supabase, typically `https://<project-ref>.supabase.co/auth/v1/callback`. Separately, allow the website's local and production `/auth/callback` URLs in Supabase Auth redirect settings. Exchange the callback code for a session using the Supabase SSR flow; allow only validated same-site return paths. Request basic identity scopes only, not Calendar or Drive access. [Google Auth setup](https://supabase.com/docs/guides/auth/social-login/auth-google).
 
@@ -27,11 +27,11 @@ Use a separate development/staging project for test recordings before public lau
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only worker/admin credential |
 | `OPENROUTER_API_KEY` | Server-only inference credential |
 | `OPENROUTER_TRANSCRIPTION_MODEL` | Server-only, initial `openai/whisper-large-v3-turbo` |
-| `OPENROUTER_SUMMARY_MODEL` | Server-only, initial `amazon/nova-micro-v1` |
+| `OPENROUTER_SUMMARY_MODEL` | Server-only, `z-ai/glm-5.3-flash` |
 | `WORKER_SECRET` | Server-only authentication for scheduled processing |
 | `NEXT_PUBLIC_SITE_URL` | Canonical origin for the relevant environment |
 
-Record final names and placeholders in `.env.example` during scaffolding. Real values belong in ignored `.env.local`, Vercel environment settings, or Supabase Vault. Google client secrets belong in Supabase provider configuration. No direct OpenAI key is required.
+Record final names and placeholders in `.env.example` during scaffolding. Real values belong in ignored `.env.local`, Vercel environment settings, or Supabase Vault. Google client secrets belong in Supabase provider configuration. No direct OpenAI key is required. Summary requests set `provider.sort` to `"throughput"` with same-model provider fallbacks enabled, as specified in [Models](models.md).
 
 ## Vercel
 

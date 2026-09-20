@@ -11,7 +11,9 @@ Planning and documentation only. No app code, dependencies, Supabase project, or
 | Part | Technology |
 | --- | --- |
 | Website and API | Next.js App Router, hosted on Vercel |
-| UI | shadcn/ui |
+| UI | shadcn/ui and Vercel AI Elements |
+| Streaming Markdown | Vercel Streamdown, including LaTeX/math |
+| Summary streaming | Vercel AI SDK through OpenRouter; Supabase Realtime delivery |
 | Client API state | TanStack Query |
 | Login | Google through Supabase Auth |
 | Backend | A new Supabase project |
@@ -19,7 +21,7 @@ Planning and documentation only. No app code, dependencies, Supabase project, or
 | Transcript and summary | Markdown strings in Supabase Postgres |
 | Inference | OpenRouter |
 
-TypeScript and Tailwind CSS are proposed implementation defaults. Model recommendations are **Whisper Large V3 Turbo** for transcription and **Nova Micro** for summaries, both through OpenRouter. See the dated [model comparison](docs/models.md) for prices, alternatives, and validation still needed.
+TypeScript and Tailwind CSS are proposed implementation defaults. Use **Whisper Large V3 Turbo** for transcription and **GLM 5.3 Flash** for summaries, both through OpenRouter. Summary requests prioritize the fastest available provider by output throughput. See the dated [model comparison](docs/models.md) for prices, alternatives, and validation still needed.
 
 ## Product
 
@@ -27,7 +29,7 @@ TypeScript and Tailwind CSS are proposed implementation defaults. Model recommen
 - Google sign-in, followed by one simple recording page.
 - Start and stop controls, with a visible recording state.
 - Past meetings with audio playback, the full transcript, and a summary.
-- Processing after recording stops; no real-time transcription required.
+- Processing after recording stops; no real-time transcription required. The summary renders progressively as it is generated.
 
 Keep the UI small. Reliability, readable content, and clear recovery matter more than extra features.
 

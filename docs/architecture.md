@@ -4,7 +4,7 @@
 
 One Next.js App Router project on Vercel, with Supabase Auth, Postgres, and private Storage. Use TypeScript, Tailwind CSS, and shadcn/ui. TanStack Query owns client-side server data and mutations. OpenRouter calls run only on the server.
 
-Public pages are statically rendered where possible. The private app uses cookie-based Supabase SSR authentication, protected Route Handlers, and uncached per-user responses. No separate API service, vector DB, or real-time infrastructure is needed.
+Public pages are statically rendered where possible. The private app uses cookie-based Supabase SSR authentication, protected Route Handlers, and uncached per-user responses. Use Supabase Realtime for live summary updates; no separate API service or vector DB is needed.
 
 ```mermaid
 flowchart LR
@@ -15,7 +15,8 @@ flowchart LR
   W <--> D
   W <--> S
   W --> O[OpenRouter]
-  O -->|Transcript then summary| W
+  O -->|Transcript then streamed summary| W
+  D -->|Private Realtime updates| B
 ```
 
 The durable job table and scheduled wake-up are proposed because processing must survive navigation, request failures, and deploys. This uses the chosen platforms without adding another queue service.
@@ -44,7 +45,7 @@ Job stages:
 
 1. **Prepare:** download only the expected Storage object, verify actual media format/duration/size, and use a bundled Linux-compatible FFmpeg/ffprobe in the Node runtime to create independently decodable audio segments. Start with roughly five-minute segments, codec-aware boundaries, and a small overlap. Keep the original audio unchanged. Persist segment files and metadata before enqueueing transcription jobs.
 2. **Transcribe:** process a segment with OpenRouter, then save its text and available timing metadata. Use a 45-second provider timeout; tune segment length against the provider's execution limit. Retry transient network, 429, and 5xx failures with backoff, at most three attempts. Do not repeatedly retry invalid audio or credentials.
-3. **Summarize:** after all segments succeed, assemble the full transcript in time order, deduplicating only actual overlapping text. Save that transcript before requesting a Markdown summary. Finish the meeting only after saving the summary.
+3. **Summarize:** after all segments succeed, assemble the full transcript in time order, deduplicating only actual overlapping text. Save that transcript before requesting a streamed Markdown summary using Vercel AI SDK and the OpenRouter provider. Persist partial snapshots for live delivery as described in [Streaming UI](streaming-ui.md). Finish the meeting only after validating and saving the complete summary.
 4. **Delete:** remove original and derived files, then DB content. Retry safely on partial failure; deleted meetings must not reappear through worker writes.
 
 Use deterministic segment keys and unique job keys per meeting/stage/segment. Save stage output and enqueue the next job in the same DB transaction. Object writes use stable keys and reconciliation because Storage and Postgres are not one transaction. Provider calls may still be billed twice after a crash; exactly-once billing is not promised.
@@ -63,6 +64,7 @@ All private routes verify the authenticated user server-side, validate inputs, a
 | `POST /api/meetings` | Create draft using a client idempotency key; return ID and permitted upload path |
 | `POST /api/meetings/:id/finalize` | Check owned object and size, atomically mark queued and insert prepare job; return `202`; duplicates return existing state |
 | `GET /api/meetings/:id` | Return status, metadata, transcript Markdown, summary Markdown, and safe error details |
+| `GET /api/meetings/:id/summary` | Return the owned summary snapshot, generation ID, revision, and status for initial load/reconnect |
 | `GET /api/meetings/:id/audio` | Return short-lived signed playback URL for an owned, non-deleting meeting |
 | `PATCH /api/meetings/:id` | Rename only; recommended maximum 160 characters |
 | `POST /api/meetings/:id/retry` | Requeue only failed/incomplete stages; bounded, rate-limited, idempotent |
@@ -75,8 +77,8 @@ Standard errors: `{ error: { code, message, retryable } }`. Use `401` for missin
 
 Use user-scoped query keys such as `['meetings', userId, filters]` and `['meeting', userId, id]`. Clear them on sign-out/account change. Wrap fetch requests in query functions and create/finalize/retry/delete in mutations. Auth redirects and TUS byte transfer use their own clients, with upload lifecycle coordinated by a mutation.
 
-Poll only unfinished meetings, initially every three seconds while visible, with backoff when queued for longer. Refetch on focus and after mutations; stop polling terminal states. Read retries can be automatic; mutation retries require server idempotency. Never optimistically claim recording, upload, or processing success.
+Use an authenticated Supabase Realtime subscription for live summary snapshots, updating the user-scoped TanStack Query cache. Poll unfinished meetings every three seconds while visible as a status/reconnect fallback, with backoff when queued for longer. Refetch on focus and after mutations; stop polling terminal states. Read retries can be automatic; mutation retries require server idempotency. Never optimistically claim recording, upload, or processing success.
 
-Render Markdown as data with raw HTML disabled and safe links; never compile it as MDX or execute embedded code. Block remote images in private meeting Markdown to avoid tracking requests. Summary comes first, transcript second, with accessible tabs or sections and a standard audio player.
+Use AI Elements `MessageResponse` backed by Streamdown for both progressive summaries and saved documents, with math/code/diagram plugins and shared brand tokens. See [Streaming UI](streaming-ui.md). Render Markdown as data with raw HTML disabled and safe links; never compile it as MDX or execute embedded code. Block remote images in private meeting Markdown to avoid tracking requests. Summary comes first, transcript second, with accessible tabs or sections and a standard audio player.
 
 Sources: [Supabase SSR](https://supabase.com/docs/guides/auth/server-side/creating-a-client?queryGroups=framework&framework=nextjs), [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview), [shadcn/ui for Next.js](https://ui.shadcn.com/docs/installation/next).
