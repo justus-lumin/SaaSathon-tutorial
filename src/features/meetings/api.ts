@@ -1,6 +1,7 @@
 import { Upload } from "tus-js-client";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { BUCKET, MAX_RECORDING_BYTES, type Meeting } from "./types";
+import { uploadAuthorization } from "./upload-auth";
 import {
   recordingBlob,
   updateLocalRecording,
@@ -72,10 +73,11 @@ export async function uploadRecording(
         retryDelays: [0, 1000, 3000, 5000, 10000],
         uploadDataDuringCreation: true,
         removeFingerprintOnSuccess: true,
-        headers: {
-          authorization: `Bearer ${session.access_token}`,
-          apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-        },
+        ...uploadAuthorization(
+          record.owner,
+          process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+          () => supabase.auth.getSession(),
+        ),
         metadata: {
           bucketName: BUCKET,
           objectName: meeting.audio_path!,
@@ -83,14 +85,6 @@ export async function uploadRecording(
           cacheControl: "3600",
         },
         fingerprint: async () => `${record.owner}/${record.id}/${blob.size}`,
-        onBeforeRequest: async (req) => {
-          const {
-            data: { session: latest },
-          } = await supabase.auth.getSession();
-          if (!latest || latest.user.id !== record.owner)
-            throw new Error("The signed-in account changed.");
-          req.setHeader("authorization", `Bearer ${latest.access_token}`);
-        },
         onError: () =>
           finish(
             new Error(
