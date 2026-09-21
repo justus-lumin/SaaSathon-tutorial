@@ -1,6 +1,6 @@
 # Documentation
 
-Status: core product implemented locally; hosted services require configuration. Updated: 21 September 2026.
+Status: product deployed; hosted processing verified, Google OAuth setup pending. Updated: 21 September 2026.
 
 | Document | Purpose |
 | --- | --- |
@@ -11,6 +11,7 @@ Status: core product implemented locally; hosted services require configuration.
 | [Models](models.md) | OpenRouter recommendations, current evidence, costs, and evaluation |
 | [Public pages](public-pages.md) | Landing page, SEO page briefs, indexing, and measurement |
 | [Setup](setup.md) | Local setup, Google Auth, Supabase, OpenRouter, and Vercel |
+| [Deployment](deployment.md) | Hosted service connections and live verification |
 | [Implementation](implementation.md) | Shipped behavior, checks, and remaining launch work |
 | [Build plan](build-plan.md) | Implementation order and release checks |
 | [Brand system](../brand.md) | Soft Wave visual identity and component rules |

@@ -53,4 +53,4 @@ Run the README checks. `npm run test:db` creates and destroys only its own dispo
 
 Then verify Google login/logout, two-account isolation, TUS upload/resume, worker execution, streaming reconnect, failed-provider retry, audio playback, and deletion on the configured environment. Check the private bucket cannot be read anonymously. Test a full hour, microphone interruption, storage exhaustion, and mobile/browser sleep before public launch.
 
-No paid inference or deployed Vercel worker has been verified yet. Public-site legal copy, account deletion, operational alerting, and the long-recording deployment benchmark remain launch work. Existing requirements documents describe that broader launch target.
+Short-meeting paid inference and the deployed Vercel worker are verified; see [Deployment](deployment.md). Google OAuth is still pending. Public-site legal copy, account deletion, operational alerting, and the long-recording deployment benchmark remain launch work. Existing requirements documents describe that broader launch target.

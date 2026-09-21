@@ -30,4 +30,4 @@ The shipped product covers individual meetings. Account-wide deletion, productio
 - Product tests exercise segmentation, overlap handling, safe errors, GLM throughput routing, actual streaming response parsing, and durationless WebM normalization with bundled FFmpeg.
 - PostgreSQL tests apply the migration and exercise ownership, denied writes, idempotency, the full processing state machine, stale leases/revisions, retry generation reset, and deletion.
 - Helium local-mode QA used synthetic audio without accessing the hardware microphone. Start/stop, playable persisted audio, rename, and recovery after reload were verified. Product layouts were checked at desktop and narrow mobile widths.
-- Google OAuth, hosted Storage/Realtime, paid inference, and Linux Vercel execution remain unverified pending service configuration.
+- Hosted TUS Storage uploads, paid transcription/summary inference, Linux Vercel processing, and Cron delivery passed a synthetic short-meeting smoke test. Google OAuth and browser Realtime delivery remain unverified. See [Deployment](deployment.md).
