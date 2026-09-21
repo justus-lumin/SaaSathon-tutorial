@@ -106,6 +106,11 @@ export function LoginForm({
           </p>
         </div>
       </div>
+      <p className="mx-auto max-w-md text-center text-sm text-muted-foreground">
+        <Link href="/privacy" className="underline underline-offset-4">
+          How we handle your information
+        </Link>
+      </p>
     </main>
   );
 }

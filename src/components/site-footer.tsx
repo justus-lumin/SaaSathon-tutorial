@@ -16,6 +16,9 @@ export function SiteFooter() {
             <Link className="quiet-link" href="/guides">
               Guides
             </Link>
+            <Link className="quiet-link" href="/privacy">
+              Privacy
+            </Link>
             <Link className="quiet-link" href="/design-system">
               Design system
             </Link>
