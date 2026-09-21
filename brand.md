@@ -1,42 +1,47 @@
-# Brand and design-system brief
+# Meeting Recorder brand
 
-Status: preparation for the next phase, not a finished brand. “Meeting Recorder” is the working name. No name, logo, font, palette, or domain is final.
+Selected direction: **01 / Soft Wave**, chosen by Justus on 21 September 2026.
 
-## Product character
+A quiet, simple meeting recorder. Black, white, and neutral greys only. Rounded shapes, smooth controls, generous space.
 
-Simple, robust, fast, and sleek. A useful recording tool that stays out of the way. The interface should feel calm and predictable, with the recording state obvious and the saved content easy to read.
+## Assets
 
-Audience assumption: individuals who want a record of a conversation without adopting a complex meeting platform. Confirm this during brand work rather than inventing a narrow customer persona.
+- [Selected logo](assets/brand/meeting-recorder-logo.png): generated raster concept with transparent background. Three rounded vertical bars plus the “Meeting Recorder” wordmark. Use on white or very pale grey.
+- [Visual overview](assets/brand/brand-overview.png): generated visual reference for the selected direction.
+- [All explored directions](output/brand-concepts/): five logo concepts and their overview boards.
 
-The product promise is concrete: record a meeting, keep the audio, read the transcript, and review a short summary. Avoid claims of perfect transcription, automatic attendance, or universal call capture.
+The image lettering is generated artwork. Nunito Sans is the proposed interface font, not a verified identification of the wordmark. The overview is a visual reference; use the exact specifications below for implementation. Vector artwork and small-size production validation remain to be done.
 
-## Direction to explore
+## Implemented defaults
 
-Start with a restrained, typography-led interface: quiet neutral surfaces, strong readable text, one accent, and a distinct recording/error treatment. A simple wordmark may be sufficient. Any symbol must stay legible at favicon size and should not crowd the controls.
+The canonical palette, font, radii, semantic roles, spacing, page widths, motion, and 12-column layout variables live in [`src/app/tokens.css`](src/app/tokens.css). Use that file as the source of truth; do not duplicate its values elsewhere.
 
-Prefer one strong direction with a small variation if needed. Avoid decorative dashboards, gradients, animated waveforms without purpose, large icon inventories, and generic AI motifs. The primary experience is a recording control plus a list of meetings.
+- Only ink, grey, line, paper, and white. Errors and recording states use labels and icons, never a new color.
+- Nunito Sans is served locally. The website redraws the three-capsule icon as a scalable SVG in [`Brand`](src/components/brand.tsx) and pairs it with a typographic wordmark. The generated logo is the visual reference, not an exact font source.
+- Public pages use one shared 12-column grid, consistent section spacing, short copy, and generous negative space. Compact layouts preserve the spacing rhythm without horizontal overflow.
+- Shared shadcn-style Radix primitives live in `src/components/ui`. Assistant responses use the customized AI Elements primitives in `src/components/ai-elements/message.tsx`.
+- `/design-system` demonstrates controls, keyboard-accessible dialogs/tabs, empty/loading/error states, and simulated streaming Markdown with tables, code, math, and diagrams.
+- `AGENTS.md` defines the implementation contract. `npm run check:design` rejects hard-coded colors, alternative Tailwind palettes, and arbitrary color/radius overrides; it runs through lint.
 
-## Decisions and deliverables for the design phase
+The sparse website and live component gallery supersede the denser generated overview board for layout decisions.
 
-| Area | Deliverable |
-| --- | --- |
-| Name and identity | Confirm name; wordmark direction, small-size treatment, favicon, clearspace |
-| Typography | UI/body face, optional display face, fallbacks, weights, sizes, line heights |
-| Color | Concrete semantic color values and verified text/control contrast |
-| Layout | Page widths, reading measure, spacing scale, responsive behavior |
-| Components | shadcn/ui controls plus AI Elements responses/actions and Streamdown document styles |
-| Rich content | Headings, tables, lists, code, inline/display LaTeX, diagrams, and incomplete streaming states |
-| Interaction | Focus, disabled/loading states, recording indicator, restrained motion |
-| Voice | Final labels, empty states, errors, and landing-page copy direction |
-| Screen examples | Landing page, recorder/history, and meeting detail at desktop/mobile widths |
+## Logo use
 
-Design for light mode first as a proposal. Add dark mode only if deliberately included. Target WCAG AA contrast, visible keyboard focus, comfortable touch targets, and reduced-motion support. Never rely on red alone to signal recording or failure.
+Keep the icon to the left of the wordmark. Preserve proportions and leave at least one icon width of clear space around the lockup. Target a minimum icon height of 24 px, subject to production validation. On narrow screens, use a separately prepared icon asset rather than shrinking the wordmark until unreadable. A white reverse logo will be needed for dark backgrounds; do not place this dark PNG directly on black.
+
+## Product language
+
+Plain, concise, useful. Use “New recording”, “Stop recording”, “Summary”, and “Transcript”. Empty state: “No meetings yet. Start your first recording.” Error: “Recording couldn't start. Check your microphone access and try again.” Show recording state with a black dot and the word “Recording”.
+
+## Implementation status
+
+The shared theme, public landing page, five guides, sample meeting, and component gallery are implemented. Private recording and backend work is coordinated in a separate task. Design checks do not prove deployed recording, authentication, or inference behavior.
 
 ## shadcn/ui mapping
 
 Use shadcn/ui as the component foundation and Vercel AI Elements for ChatGPT-style response components. This means familiar response rendering and actions, not ChatGPT branding or an added chat product. Streamdown handles rich Markdown. Define the approved palette centrally in CSS variables for `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, and `ring`, including their foreground pairs. Add recording/success tokens only where a distinct meaning is needed. Define radii and typography/spacing roles once.
 
-The final token values will live in the app's global theme when it exists; this file will explain their use and point to the canonical location. Do not maintain duplicate token values in multiple docs.
+The values are now defined centrally in `src/app/tokens.css` and applied globally by `src/app/globals.css`. Do not maintain duplicate token values in multiple docs.
 
 ## Required screen states
 
@@ -45,18 +50,3 @@ The final token values will live in the app's global theme when it exists; this 
 - Detail: queued, transcribing, summarizing, ready, transcript available but summary failed, playback error, and deleting.
 
 Keep the recording control in a stable position across state changes. Status changes need text announcements without announcing every timer tick. History should be a simple list, not a collection of oversized cards. Long transcripts need readable line lengths and clear headings.
-
-## Working copy examples
-
-| Use | Draft |
-| --- | --- |
-| Login | Continue with Google |
-| Record | Start recording |
-| Stop | Stop recording |
-| Empty history | Your meetings will appear here. |
-| Upload | Saving your recording… |
-| Saved and queued | Recording saved. Preparing your transcript. |
-| Summary failure | Your transcript is ready. We couldn't create the summary. Try again. |
-| Permission failure | Microphone access is blocked. Allow access in your browser and try again. |
-
-The next phase should produce visual examples and exact usable tokens, not just a mood board. App implementation remains a separate step.
