@@ -1,48 +1,56 @@
-# Setup and deployment plan
+# Setup and deployment
 
-No steps in this document have been executed. There is no app to run yet. The repository is prepared for documentation and brand design.
+## Local development
 
-## Local project, when implementation starts
+Use Node 22 (`.nvmrc`), run `npm ci`, and create `.env.local` from `.env.example` if it does not exist. Run `npm run dev` and open `http://127.0.0.1:3205/app?local=1` for local recording. The dev server binds to loopback. HTTPS or localhost is required for microphone access.
 
-Scaffold Next.js App Router with TypeScript and Tailwind CSS. Use npm and commit its lockfile. Add shadcn/ui components as needed, TanStack Query, Supabase JS/SSR clients, TUS upload support, Streamdown with its math/code/diagram plugins, and the AI Elements message components. Add Vercel AI SDK (`ai`) and `@openrouter/ai-sdk-provider` for summary streaming. Use native fetch for transcription. Package commands and renderer configuration are specified in [Streaming UI](streaming-ui.md).
+The Supabase JS/SSR packages and the shadcn Supabase Next.js client registry block are installed. Browser/server helpers live in `src/lib/supabase`; `src/proxy.ts` refreshes sessions on private routes. The registry middleware was adapted so public pages and local recording remain accessible.
 
-Pin a Node LTS version supported by Next.js and Vercel at implementation time. Add dev, build, lint, typecheck, and test scripts then. Configure Linux FFmpeg/ffprobe packaging for the Vercel worker and test it in a real preview before committing to the processing approach.
+## Supabase
 
-Proposed structure: `src/app` for routes, `src/components/ui` for shadcn/ui, `src/features/meetings` for recording/history, `src/lib` for API/auth helpers, `supabase/migrations` for schema, and `content` for public pages. Avoid a monorepo or abstraction framework.
+The selected project is `fflsnkuqrniqvjvxlsrc`. Its public URL and publishable key are configured in the local ignored environment file. No privileged credentials are stored in Git.
 
-## Supabase and Google
+Apply `supabase/migrations/202609210001_meeting_recorder.sql` to the dedicated project through the Supabase SQL editor or your authenticated migration workflow. This creates tables, constrained user RPCs, worker RPCs, RLS, a private `meeting-audio` bucket, and the Realtime publication entry. Apply it once; do not rerun it as a reset. Verify the migration in a development project before public launch.
 
-Create a new dedicated Supabase project. Choose its region alongside the Vercel worker region. Apply versioned migrations for tables, RLS, bucket rules, lease RPCs, and cleanup. Enable Cron/pg_net and configure the worker wake-up only after its endpoint exists. Enable the summary snapshot table in Supabase Realtime and verify owner-only subscription access.
+Add `SUPABASE_SERVICE_ROLE_KEY` to the local and Vercel server environments. It is used only by the processing worker. Do not prefix it with `NEXT_PUBLIC_`. The browser uses the publishable key plus each user's session and RLS.
 
-Justus will configure Google OAuth. The Google OAuth authorized redirect URI is the callback displayed by Supabase, typically `https://<project-ref>.supabase.co/auth/v1/callback`. Separately, allow the website's local and production `/auth/callback` URLs in Supabase Auth redirect settings. Exchange the callback code for a session using the Supabase SSR flow; allow only validated same-site return paths. Request basic identity scopes only, not Calendar or Drive access. [Google Auth setup](https://supabase.com/docs/guides/auth/social-login/auth-google).
+### Google sign-in
 
-Use a separate development/staging project for test recordings before public launch. Do not connect previews to production meeting data. Verify login, logout, expired sessions, and two-user isolation.
+Enable Google in Supabase Auth using the OAuth client Justus configures. Google's authorized callback is:
 
-## Proposed environment variables
+```
+https://fflsnkuqrniqvjvxlsrc.supabase.co/auth/v1/callback
+```
 
-| Variable | Visibility and purpose |
+In Supabase's URL configuration, allow the website callback `http://127.0.0.1:3205/auth/callback` and the production HTTPS `/auth/callback`. Set the production site URL too. Preview origins must be explicitly allowed if testing OAuth there. Request basic identity only, not Calendar or Drive permissions. [Supabase Google guide](https://supabase.com/docs/guides/auth/social-login/auth-google).
+
+## Environment
+
+| Variable | Purpose |
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser-safe project URL |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser-safe API key; requires correct RLS |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only worker/admin credential |
-| `OPENROUTER_API_KEY` | Server-only inference credential |
-| `OPENROUTER_TRANSCRIPTION_MODEL` | Server-only, initial `openai/whisper-large-v3-turbo` |
-| `OPENROUTER_SUMMARY_MODEL` | Server-only, `z-ai/glm-5.3-flash` |
-| `WORKER_SECRET` | Server-only authentication for scheduled processing |
-| `NEXT_PUBLIC_SITE_URL` | Canonical origin for the relevant environment |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser-safe API key, protected by RLS |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only worker DB/Storage credential |
+| `OPENROUTER_API_KEY` | Server-only inference credential, not a direct OpenAI key |
+| `OPENROUTER_TRANSCRIPTION_MODEL` | Defaults to `openai/whisper-large-v3-turbo` |
+| `OPENROUTER_SUMMARY_MODEL` | Defaults to `z-ai/glm-5.3-flash` |
+| `WORKER_SECRET` | Random bearer secret for scheduled processing |
+| `NEXT_PUBLIC_SITE_URL` | Canonical origin for the environment |
 
-Record final names and placeholders in `.env.example` during scaffolding. Real values belong in ignored `.env.local`, Vercel environment settings, or Supabase Vault. Google client secrets belong in Supabase provider configuration. No direct OpenAI key is required. Summary requests set `provider.sort` to `"throughput"` with same-model provider fallbacks enabled, as specified in [Models](models.md).
+Generate the worker secret with `openssl rand -hex 32`. Store it only in `.env.local`, Vercel, and Supabase Vault. Summary routing sorts available providers by throughput with same-model fallbacks. Configure an OpenRouter spending cap before enabling public traffic.
 
-## Vercel
+## Vercel and durable processing
 
-Import this GitHub repository as a Next.js project when implementation is ready. Configure environment variables per environment and use HTTPS for microphone access. Set the Node worker duration explicitly, protect its endpoint with the worker secret, and restrict secret access to server code.
+Import the GitHub repository as a Next.js project, select Node 22, and configure the environment variables. Worker routes explicitly allow 300 seconds. Vercel must provide enough function duration, memory, and bundled-file capacity for FFmpeg. `next.config.ts` includes the Linux binaries in traced worker routes. Verify them on an actual Linux Vercel preview with a maximum-length test recording before launch.
 
-Configure Supabase Cron to POST to the worker every minute with its Vault-held credential. Check HTTP responses and job backlog so a disabled schedule or blocked preview URL cannot silently strand recordings. Test scheduled access against Vercel deployment protection. Do not use a browser ping as the only job trigger.
+After deployment, replace the two placeholders in `supabase/schedule.sql` **outside Git**, then run it in Supabase. It stores the app URL and worker secret in Vault and schedules an authenticated POST to `/api/internal/process` every minute. Do not commit the filled-in script. Avoid duplicate schedules/secrets when updating an existing installation; update the existing Vault values and cron job instead.
 
-Keep the app usable during deploys through persisted jobs, expired-lease recovery, and backward-compatible migrations. Update the canonical domain and OAuth allowlist together. Recheck hosting limits and resource needs for FFmpeg and the maximum recording length. [Vercel limits](https://vercel.com/docs/functions/limitations).
+Finalization and retries also attempt an immediate worker wake-up through Next.js `after`. Cron is the durable fallback, including when the browser closes. Verify that deployment protection permits the scheduled endpoint; authentication alone does not bypass Vercel protection. Inspect `net._http_response` and `public.processing_jobs` if meetings remain queued.
 
-## Operating basics
+## Verification
 
-Before opening signups, choose and enforce per-user recording/processing quotas, a global concurrency limit, and an OpenRouter spending cap. Record meeting/job IDs, stage durations, safe error codes, and provider usage without meeting content. Alert on repeated failures and stale queued jobs. Start with platform logs; no extra observability service is required by this plan.
+Run the README checks. `npm run test:db` creates and destroys only its own disposable Docker container. It never connects to the hosted Supabase project.
 
-A release is ready only after the [build-plan checks](build-plan.md) pass in the intended environment. Successful builds do not prove Google login, recording, processing, or private storage access.
+Then verify Google login/logout, two-account isolation, TUS upload/resume, worker execution, streaming reconnect, failed-provider retry, audio playback, and deletion on the configured environment. Check the private bucket cannot be read anonymously. Test a full hour, microphone interruption, storage exhaustion, and mobile/browser sleep before public launch.
+
+No paid inference or deployed Vercel worker has been verified yet. Public-site legal copy, account deletion, operational alerting, and the long-recording deployment benchmark remain launch work. Existing requirements documents describe that broader launch target.
