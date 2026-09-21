@@ -31,8 +31,9 @@ set role authenticated;
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',false);
 select assert_true((select count(*) from meetings)=0,'other owner cannot read meeting');
 select assert_true((select count(*) from storage.objects)=0,'other owner cannot read recording');
+select set_config('test.meeting_id',:'mid',false);
 do $$ begin
-  begin perform public.rename_meeting((select id from public.meetings limit 1),'forged'); raise exception 'ownership bypass'; exception when others then if sqlerrm <> 'NOT_FOUND' then raise; end if; end;
+  begin perform public.rename_meeting(current_setting('test.meeting_id')::uuid,'forged'); raise exception 'ownership bypass'; exception when others then if sqlerrm <> 'NOT_FOUND' then raise; end if; end;
   begin insert into storage.objects(bucket_id,name,metadata) values('meeting-audio','forged','{}'); raise exception 'storage bypass'; exception when insufficient_privilege then null; end;
 end $$;
 reset role;
@@ -71,3 +72,30 @@ select finish_processing_job(:'jid',:'token');
 select assert_true((select count(*) from meetings)=0 and (select count(*) from processing_jobs)=0,'delete cascades documents and jobs');
 reset role;
 \echo 'Database security and pipeline checks passed.'
+select assert_true((select recordings=1 from meeting_daily_usage where user_id='11111111-1111-4111-8111-111111111111'),'deleting does not reset daily quota');
+set role authenticated;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+select id as mid,audio_path from create_meeting(gen_random_uuid(),'Recovery test','audio/webm','webm') \gset
+insert into storage.objects(bucket_id,name,metadata) values('meeting-audio',:'audio_path','{"size":1234}');
+select finalize_meeting(:'mid');
+reset role;
+set role service_role;
+select id as jid,lease_token as token from claim_processing_job() \gset
+update processing_jobs set lease_expires_at=now()-interval '1 second' where id=:'jid';
+select id as jid,lease_token as token2 from claim_processing_job() \gset
+select assert_true(:'token'<>:'token2','crashed worker gets a new lease');
+select assert_true(not finish_processing_job(:'jid',:'token','{}'),'expired worker cannot finish reclaimed job');
+select fail_processing_job(:'jid',:'token2','nonretryable test',false);
+select assert_true((select status='failed' from meetings where id=:'mid'),'permanent error preserves failed meeting');
+reset role;
+set role authenticated;
+select retry_meeting(:'mid');
+select assert_true((select status='queued' and retry_count=1 from meetings where id=:'mid'),'owner can retry failed job');
+reset role;
+update meeting_daily_usage set recordings=30 where user_id='11111111-1111-4111-8111-111111111111';
+set role authenticated;
+do $$ begin
+  begin perform create_meeting(gen_random_uuid(),'Too many','audio/webm','webm'); raise exception 'quota bypass'; exception when others then if sqlerrm <> 'QUOTA_EXCEEDED' then raise; end if; end;
+end $$;
+reset role;
+\echo 'Lease recovery and durable quota checks passed.'

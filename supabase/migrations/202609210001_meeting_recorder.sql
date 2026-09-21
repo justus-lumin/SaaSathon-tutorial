@@ -172,7 +172,7 @@ begin
     where status='running' and lease_expires_at < now();
   update public.meetings m set status='failed',failure_stage=failed_job.stage,error_code='PROCESSING_FAILED',error_message=failed_job.last_error,updated_at=now()
     from public.processing_jobs failed_job where failed_job.meeting_id=m.id and failed_job.status='failed' and failed_job.stage not in ('delete','cleanup') and m.deleted_at is null and m.status not in ('ready','failed');
-  update public.meeting_summary_streams s set status='failed',updated_at=now() from public.meetings m where m.id=s.meeting_id and m.status='failed' and s.status='streaming';
+  update public.meeting_summary_streams s set status='failed',revision=s.revision+1,updated_at=now() from public.meetings m where m.id=s.meeting_id and m.status='failed' and s.status='streaming';
   if (select count(*) from public.processing_jobs where status='running') >= 3 then return; end if;
   select q.* into j from public.processing_jobs q join public.meetings m on m.id=q.meeting_id
     where q.status='queued' and q.available_at<=now() and ((m.deleted_at is null and m.status<>'failed' and q.stage<>'delete') or (q.stage='delete' and m.deleted_at is not null))
@@ -245,7 +245,7 @@ begin
   if not retry and j.stage not in ('delete','cleanup') then
     update public.meetings set status='failed',failure_stage=j.stage,error_code='PROCESSING_FAILED',error_message=left(p_message,240),updated_at=now() where id=j.meeting_id and deleted_at is null;
   end if;
-  if j.stage='summarize' then update public.meeting_summary_streams set status='failed',updated_at=now() where generation_id=p_token; end if;
+  if j.stage='summarize' then update public.meeting_summary_streams set status='failed',revision=revision+1,updated_at=now() where generation_id=p_token; end if;
 end $$;
 create function public.cleanup_abandoned_meetings() returns void language plpgsql security definer set search_path = '' as $$
 begin

@@ -20,3 +20,13 @@ Read `brand.md` before changing UI. The selected brand is Soft Wave; do not inve
 - Run typecheck, lint (including design checks), relevant tests, and a production build. Verify interactive changes in a claimed Helium tab, including a narrow viewport. Do not use Computer Use or standalone browser launches to bypass tab claiming.
 - Preview routes remain noindex. Public indexing requires a production deployment and a configured canonical site URL. Do not invent production URLs or claims about private-product behavior.
 - Never add fake testimonials, customer logos, accuracy metrics, or unsupported integration claims. SEO guides need distinct, useful content. All demo meeting content is fictional and labelled.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
