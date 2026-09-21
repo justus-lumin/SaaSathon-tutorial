@@ -22,7 +22,7 @@ Users can select only their meetings and documents. They cannot write statuses, 
 
 The DB enforces 30 creations per UTC day, including meetings later deleted, and 1 GB of finalized audio per account. Original files are capped at 50 MB. Decoded audio is capped at approximately one hour (a small codec allowance exists). Summary size/context and inference attempts are bounded. Logs contain job IDs, stage, duration, and safe outcomes, not meeting text or provider error bodies.
 
-The shipped product covers individual meetings. Account-wide deletion, production alerting, legal/privacy pages, and full deployment/load benchmarks are not implemented. Do not present local tests as proof of live service configuration.
+The shipped product covers individual meetings. Account-wide self-service deletion, production alerting, and full deployment/load benchmarks are not implemented. A public privacy policy is deployed. Do not present local tests as proof of live service configuration.
 
 ## Evidence
 
@@ -30,4 +30,4 @@ The shipped product covers individual meetings. Account-wide deletion, productio
 - Product tests exercise segmentation, overlap handling, safe errors, GLM throughput routing, actual streaming response parsing, and durationless WebM normalization with bundled FFmpeg.
 - PostgreSQL tests apply the migration and exercise ownership, denied writes, idempotency, the full processing state machine, stale leases/revisions, retry generation reset, and deletion.
 - Helium local-mode QA used synthetic audio without accessing the hardware microphone. Start/stop, playable persisted audio, rename, and recovery after reload were verified. Product layouts were checked at desktop and narrow mobile widths.
-- Hosted TUS Storage uploads, paid transcription/summary inference, Linux Vercel processing, and Cron delivery passed a synthetic short-meeting smoke test. Google OAuth and browser Realtime delivery remain unverified. See [Deployment](deployment.md).
+- Hosted TUS Storage uploads, paid transcription/summary inference, Linux Vercel processing, and Cron delivery passed a synthetic short-meeting smoke test. Google OAuth and a real browser upload are verified. Token-by-token Realtime delivery and reconnect remain unmeasured. See [Deployment](deployment.md).

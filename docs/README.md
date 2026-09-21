@@ -1,6 +1,6 @@
 # Documentation
 
-Status: product deployed; hosted processing verified, Google OAuth setup pending. Updated: 21 September 2026.
+Status: product deployed; hosted processing, Google sign-in, and browser upload verified. Updated: 21 September 2026.
 
 | Document | Purpose |
 | --- | --- |

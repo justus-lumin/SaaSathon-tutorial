@@ -44,7 +44,7 @@ Transcript and summary documents are stored as Markdown strings. Summary generat
 
 Follow [Setup](docs/setup.md) to apply the migration, enable Google login, configure secrets, deploy, and schedule the worker. The Supabase browser configuration alone does not provision the DB or enable transcription. Server keys and the schedule are still required.
 
-The app is deployed at [saa-sathon-tutorial.vercel.app](https://saa-sathon-tutorial.vercel.app). Private uploads, paid inference, and the Vercel worker passed a synthetic short-meeting test. Google OAuth setup is still pending. See the [deployment record](docs/deployment.md) for verified behavior and remaining checks.
+The app is deployed at [saa-sathon-tutorial.vercel.app](https://saa-sathon-tutorial.vercel.app). Private uploads, paid inference, and the Vercel worker passed a synthetic short-meeting test. Google sign-in and a real browser upload are verified. See the [deployment record](docs/deployment.md) for verified behavior and remaining checks.
 
 ## Checks
 

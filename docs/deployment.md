@@ -37,8 +37,19 @@ A disposable test account and generated speech fixture exercised the deployed pr
 
 Each processing stage completed in one attempt. The synthetic recording generated 225 transcript characters and 691 summary characters. No real meeting audio was used. This verifies a short meeting, not the one-hour capacity target.
 
-## Remaining verification
+## Google authentication and browser verification
 
-Google OAuth is not configured yet. Browser automation was blocked by an open extension panel on the Cloud Console page. The callback to register in Google is `https://fflsnkuqrniqvjvxlsrc.supabase.co/auth/v1/callback`. Supabase must allow `https://saa-sathon-tutorial.vercel.app/auth/callback` and `http://127.0.0.1:3205/auth/callback` and use the production website as its site URL. Complete a real Google login before opening access to users.
+Google Cloud project `saasathon-tutorial` has an external web OAuth client with publishing status **In production**. Supabase's Google provider is enabled, with nonce checks retained. The client requests only OpenID, email, and basic profile scopes.
 
-The delayed physical-deletion job is being checked separately from immediate deletion visibility. Account-wide deletion, legal/privacy pages, production alerts, and full-hour/mobile-sleep benchmarks remain launch work.
+- Google redirect: `https://fflsnkuqrniqvjvxlsrc.supabase.co/auth/v1/callback`.
+- Website origin and Supabase site URL: `https://saa-sathon-tutorial.vercel.app`.
+- Supabase redirect allowlist: production `/auth/callback` and `http://127.0.0.1:3205/auth/callback`.
+- Public homepage and `/privacy` policy are configured in Google branding.
+
+A real Google identity successfully signed in. A preserved seven-second browser recording uploaded through TUS with HTTP 201, finalized with HTTP 202, and reached `ready` with stored transcript and summary. This exposed and verified the fix for duplicate browser Authorization headers. The browser also rendered summary Markdown headings on a subsequent short recording. Token-by-token streaming and reconnect behavior were not separately measured.
+
+The synthetic deletion job subsequently removed the meeting row and all its audio objects. Its disposable Auth account was then removed. User recordings were preserved.
+
+## Remaining launch checks
+
+Account-wide self-service deletion, production alerts, and full-hour/mobile-sleep benchmarks remain launch work. The privacy page supports manual account-deletion requests. These short live tests do not establish long-recording reliability or load capacity.
